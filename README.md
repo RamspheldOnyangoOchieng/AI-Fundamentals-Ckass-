@@ -52,4 +52,10 @@ The current implementation includes routes between:
 - Nandi
 - Kericho
 
+### Algorithm Used
+
+This project solves the Traveling Salesman Problem using a brute-force approach. It generates all possible permutations of the intermediate towns (excluding the start/end city, Nairobi) and calculates the total driving distance for each complete route (starting and ending in Nairobi). The route with the shortest total distance is then identified as the optimal route.
+
+This method guarantees finding the absolute shortest route but becomes computationally expensive as the number of towns increases due to the factorial growth of permutations.
+
 The program calculates the optimal route starting and ending in Nairobi, considering real driving distances between cities.

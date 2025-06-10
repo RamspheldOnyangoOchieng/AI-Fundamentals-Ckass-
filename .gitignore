@@ -23,18 +23,7 @@ wheels/
 
 # Virtual Environment
 venv/
-ENV/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-
-# OS
-.DS_Store
-Thumbs.db
-
+notes/
 # Ignore Python bytecode files
 *.pyc
 # Ignore Python cache directories

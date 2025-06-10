@@ -7,11 +7,15 @@ import pandas as pd                   # To store and organize town data and rout
 import random                        # Optional: Can be used if you want to create random test data or shuffle routes
 import time                          # Optional: To measure how long route calculations take for performance checks
 from folium.plugins import AntPath, PolyLineTextPath
+import os
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
+load_dotenv()
+ORS_API_KEY = os.getenv('ORS_API_KEY')
 
 # connecting the openrouteservice API
 
-ORS_API_KEY='5b3ce3597851110001cf6248814f50c45b5146a09821fbceab123886'
 def connect_openrouteservice(api_key):
     """
     Connect to the OpenRouteService API using the provided API key.
@@ -26,7 +30,6 @@ def connect_openrouteservice(api_key):
         print(f"Error connecting to OpenRouteService: {e}")
         return None
 
-# Example usage:
 ors_client = connect_openrouteservice(ORS_API_KEY)
 if ors_client is None:
     print("Failed to connect to OpenRouteService. Please check your API key.")
@@ -62,6 +65,50 @@ def calculate_route_distance(client, route):
     """
     coords = [(town['longitude'], town['latitude']) for town in route]
     return get_route_distance(client, coords)
+
+def visualize_routes_distances(all_routes):
+    """
+    Create a bar chart visualization of all routes and their distances using matplotlib.
+    :param all_routes: List of tuples containing (route, distance, route_str)
+    """
+    # Extract route strings and distances
+    routes = [route[2] for route in all_routes]
+    distances = [route[1]/1000 for route in all_routes]  # Convert to kilometers
+    
+    # Create figure and axis
+    plt.figure(figsize=(15, 8))
+    
+    # Create bar chart
+    bars = plt.bar(range(len(routes)), distances)
+    
+    # Customize the chart
+    plt.title('Route Distances Comparison', fontsize=14, pad=20)
+    plt.xlabel('Routes', fontsize=12)
+    plt.ylabel('Distance (km)', fontsize=12)
+    
+    # Rotate x-axis labels for better readability
+    plt.xticks(range(len(routes)), routes, rotation=45, ha='right')
+    
+    # Add value labels on top of each bar
+    for bar in bars:
+        height = bar.get_height()
+        plt.text(bar.get_x() + bar.get_width()/2., height,
+                f'{height:.2f} km',
+                ha='center', va='bottom')
+    
+    # Highlight the shortest route
+    shortest_idx = distances.index(min(distances))
+    bars[shortest_idx].set_color('green')
+    
+    # Adjust layout to prevent label cutoff
+    plt.tight_layout()
+    
+    # Save the plot
+    plt.savefig('route_distances.png')
+    print("\nRoute distances visualization saved as 'route_distances.png'")
+    
+    # Show the plot
+    plt.show()
 
 def optimize_route(client, towns):
     """
@@ -105,9 +152,11 @@ def optimize_route(client, towns):
         print(f"Route: {shortest_str}")
         print(f"Total Distance: {shortest_dist/1000:.2f} km")
         print("=" * 50)
+        
+        # Create visualization of all routes
+        visualize_routes_distances(all_routes)
     
     return best_route
-
 
 def create_map(towns, route):
     """
@@ -251,7 +300,6 @@ def calculate_all_routes(client, towns):
     return all_routes
 
 def main():
-    # Example towns data (replace with actual town data)
     towns = [
         {'name': 'Nairobi', 'latitude': -1.2921, 'longitude': 36.8219},
         {'name': 'Meru', 'latitude': 0.0460, 'longitude': 37.6493},
@@ -282,6 +330,4 @@ if __name__ == "__main__":
     main()
     end_time = time.time()
     print(f"\nRoute optimization completed in {end_time - start_time:.2f} seconds.")
-# Optional: You can visualize the route on a static 2D plot using matplotlib if needed
-# Note: The above code assumes you have the OpenRouteService API key and the necessary libraries installed.
 
